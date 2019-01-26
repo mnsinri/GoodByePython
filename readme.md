@@ -1,4 +1,5 @@
 # Git lecture for a noob
 Yes, i am.
-- [ ] pro
-- [x] noob
+I AM NOT NOOB NOW.
+- [x] pro
+- [ ] noob
