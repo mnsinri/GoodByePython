@@ -73,4 +73,5 @@ def menu():
 def userpage():
     pass
 
-menu()
+if __name__ == '__main__':
+    userId = menu()
