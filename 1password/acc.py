@@ -4,7 +4,7 @@ class Account:
     serial = 'customerData/serialNum.txt'
 
     def __init__(self, username, email_address, pincode):
-        self.user = username
+        self.name = username
         self.address = email_address
         self.pin = pincode
         self.count = 0
@@ -12,25 +12,23 @@ class Account:
 
     def register(self):
         try:
-            with open(self.serial, mode='r') as d:
-                num = d.read()
+            with open(self.serial, mode='r') as f:
+                num = f.read()
             try:
                 self.num = int(num) + 1
             except:
                 self.num = 0
-            with open(self.serial, mode='w') as e:
-                e.write(str(self.num))
+            with open(self.serial, mode='w') as f:
+                f.write(str(self.num))
 
             with open(self.Dpath, mode='a') as f:
-                f.write('{0};{1};{2};{3}\n'.format(self.num, self.user, self.address, self.pin))
+                f.write('{0};{1};{2};{3}\n'.format(self.num, self.name, self.address, self.pin))
 
             user_pass = self.Apath + 'number' + str(self.num) + '.txt'
-            with open(user_pass, 'w') as g:
+            with open(user_pass, 'w') as f:
                 pass
-            print(' **Registration Complete')
             return True
         except:
-            print(' **Registration fail')
             return False
 
     def checkAddr(self, email_address):
@@ -39,7 +37,7 @@ class Account:
                 data = line.strip().split(';')
                 if data[2] == email_address:
                     self.num = data[0]
-                    self.user = data[1]
+                    self.name = data[1]
                     self.address = data[2]
                     self.pin = data[3]
                     return True
