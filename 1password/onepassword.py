@@ -79,7 +79,7 @@ def userpage(userId):
     sleep(1)
 
     while True:
-        print(' >Registar new app  : 1')
+        print(' >Register new app  : 1')
         print(' >Display your apps : 2')
         print(' >Log out           : 3')
         sieve = input('=> ')
