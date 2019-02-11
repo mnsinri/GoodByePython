@@ -6,7 +6,7 @@ def pintable():
     conn = sqlite3.connect(acc_path)
     c = conn.cursor()
 
-    sql = 'CREATE TABLE pin_data(apps TEXT, name TEXT, pin TEXT)'
+    sql = 'CREATE TABLE IF NOT EXISTS pin_data(apps TEXT, name TEXT, pin TEXT)'
     c.execute(sql)
 
     conn.commit()

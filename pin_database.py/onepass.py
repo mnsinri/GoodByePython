@@ -1,120 +1,55 @@
+import accdb
 import pindb
-import accdb 
+import interface 
 
 def menu():
-    try:
-        accdb.acctable()
-    except:
-        pass
+    accdb.acctable()
+    login = interface.Login()
 
     while True:
-        print('*Register new account  : 1')
-        print('*Log in to your acount : 2')
-        sieve = input('=> ')
+        sieve = login.loginmenu()
 
-        if sieve == str(0):
+        if sieve.lower() == 'inoriminase': #admin command
             accdb.manageAccount()
 
-        if sieve == str(1):
+        elif sieve == str(1): #registar new user
             print('*Create your account')
 
-            username = input(' *User name : ')
-            username = accdb.makeAccountname(username)
+            login.registarNewUser()
+            return login.name
 
-            while True:
-                address = input(' *Email address : ')
-                if accdb.decMail(address):
-                    if address == input(' *Repeat email address : '):
-                        break
-                    else:
-                        print(' --The emails do not match')                
-                else:
-                    print(' --Please fill in your email address ')
-
-            pincode = input(' *Password : ')
-            while not pincode == input(' *Repeat password : '):
-                print(' --The passwords do not match')
-                pincode = input(' *Password : ')
-
-            if accdb.register(username, address, pincode):
-                print(' --Registration Complete')
-                return username
-            else:
-                print(' --Registration fail')
-                
-        elif sieve == str(2):
+        elif sieve == str(2): #login own account
             print('*Log in')
-
-            value = input(' *Email address or username: ')
-            while True:
-                data = accdb.checkinfo(value)
-                if not data == None:
-                    break
-                print(' --This is not registared')
-                value = input(' *Email address or username: ')
             
-            pincode = input(' *Password : ')
-            while not accdb.checkPin(pincode, data):
-                print(' --This password is incorrect')
-                pincode = input(' *Password : ')
-            return data[0][0]
+            login.comparePersonalData()
+            login.comparePin()
+            return login.name
 
         else:
-            print('--Choose your choice')
+            print('--Choose your choice\n')
 
 def userpage(username):
-    try:
-        pindb.pintable()
-    except:
-        pass
-    print('>Hello, {} !'.format(username))
+    pindb.pintable()
+    conn = interface.Mypage(username)
+    print('\n>Hello, {} !'.format(conn.name))
 
     while True:
-        print(' >Registar new app  : 1')
-        print(' >Display your apps : 2')
-        print(' >Log out           : 3')
-        sieve = input('=> ')
+        sieve = conn.usermenu()
 
-        if sieve == str(1):
-            print('  >Add new app')
-            while True:
-                appname = input('  >App name : ')
-                while True:
-                    conf = input("  >Is {} correct ? ('yes' or 'no') : ".format(appname)).lower()
-                    if conf in ['y', 'ye', 'yes', 'n', 'no']:
-                        break
-                if conf in ['y', 'ye', 'yes']:
-                    break
-            
-            while True:
-                print('   >Generate complex password : 1')
-                print('   >Make password by yourself : 2')
-                sieve = input('=> ')
+        if sieve == str(1): #add new appname and app'pin
+            conn.getAppsname()
+            conn.setPin()
+            conn.addApps()
 
-                if sieve == str(1):
-                    password = pindb.genPass()
-                    break
-                elif sieve == str(2):
-                    password = input('    >password :')
-                    while not password == input('    >Repeat password :'):
-                        print('  --The passwords do not match')
-                        password = input('  >Password : ')
-                    break
-
-            if pindb.addapp(appname, username, password):
-                print('   --Registration Complete')
-            else:
-                print('   --Registration fail')
-
-        elif sieve == str(2):
+        elif sieve == str(2): #desplay own appname and app'pin
             if not pindb.displayApps(username):
                 print('  --error')
 
-        elif sieve == str(3):
+        elif sieve == str(3): #log out
             return True
 
         else:
-            print('\n')
+            pass
 
 if __name__ == '__main__':
     userpage(menu())

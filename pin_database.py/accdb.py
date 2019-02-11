@@ -6,7 +6,7 @@ def acctable():
     conn = sqlite3.connect(acc_path)
     c = conn.cursor()
 
-    sql = "CREATE TABLE acc_data(name TEXT, address TEXT, pin TEXT)"
+    sql = "CREATE TABLE IF NOT EXISTS acc_data(name TEXT, address TEXT, pin TEXT)"
     c.execute(sql)
 
     conn.commit()
@@ -86,8 +86,8 @@ def manageAccount():
     conn = sqlite3.connect(acc_path)
     c = conn.cursor()
 
-    print('---Acoount Data---')
+    print('\n---Acoount Data---')
     sql = "SELECT * FROM acc_data"
     for row in c.execute(sql):
         print(row)
-        
+    print('------------------\n')
