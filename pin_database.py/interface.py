@@ -18,7 +18,7 @@ class Login:
                 if self.address == input(' *Repeat email address : '):
                     break
                 else:
-                    print(' --The emails do not match')                
+                    print(' --The emails do not match')
             else:
                 print(' --Please fill in your email address ')
 
@@ -45,7 +45,7 @@ class Login:
                 break
             print(' --This is not registared')
             value = input(' *Email address or username: ')
-    
+
     def comparePin(self):
         pincode = input(' *Password : ')
         while not accdb.checkPin(pincode, self.data):
@@ -62,7 +62,7 @@ class Mypage:
         print(' >Display your apps : 2')
         print(' >Log out           : 3')
         return input('=> ')
-    
+
     def getAppsname(self):
         print('  >Add new app')
         while True:
@@ -73,7 +73,7 @@ class Mypage:
                     break
             if conf in ['y', 'ye', 'yes']:
                 break
-    
+
     def setPin(self):
         while True:
             print('   >Generate complex password : 1')

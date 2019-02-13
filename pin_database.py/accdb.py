@@ -29,7 +29,7 @@ def makeAccountname(name):
                 break
         except:
             break
-    
+
     conn.commit()
     conn.close()
 
@@ -67,7 +67,7 @@ def checkinfo(val):
         name = "SELECT * FROM acc_data WHERE name = ?"
         c.execute(name, (val,))
         result = c.fetchall()
-    
+
     conn.commit()
     conn.close()
 

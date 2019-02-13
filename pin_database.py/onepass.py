@@ -1,6 +1,6 @@
 import accdb
 import pindb
-import interface 
+import interface
 
 def menu():
     accdb.acctable()
@@ -20,7 +20,7 @@ def menu():
 
         elif sieve == str(2): #login own account
             print('*Log in')
-            
+
             login.comparePersonalData()
             login.comparePin()
             return login.name
