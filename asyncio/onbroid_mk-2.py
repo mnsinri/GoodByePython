@@ -1,0 +1,202 @@
+import discord
+import asyncio
+import aiohttp
+import lxml.html
+import re
+from random import randint
+from googletrans import Translator
+
+token_file = 'bot.txt'
+t = Translator()
+session = aiohttp.ClientSession()
+client = discord.Client()
+
+LANGUAGES = {
+    'af': 'afrikaans',
+    'sq': 'albanian',
+    'am': 'amharic',
+    'ar': 'arabic',
+    'hy': 'armenian',
+    'az': 'azerbaijani',
+    'eu': 'basque',
+    'be': 'belarusian',
+    'bn': 'bengali',
+    'bs': 'bosnian',
+    'bg': 'bulgarian',
+    'ca': 'catalan',
+    'ceb': 'cebuano',
+    'ny': 'chichewa',
+    'cn': 'chinese',
+    'co': 'corsican',
+    'hr': 'croatian',
+    'cs': 'czech',
+    'da': 'danish',
+    'nl': 'dutch',
+    'en': 'english',
+    'eo': 'esperanto',
+    'et': 'estonian',
+    'tl': 'filipino',
+    'fi': 'finnish',
+    'fr': 'french',
+    'fy': 'frisian',
+    'gl': 'galician',
+    'ka': 'georgian',
+    'de': 'german',
+    'el': 'greek',
+    'gu': 'gujarati',
+    'ht': 'haitian creole',
+    'ha': 'hausa',
+    'haw': 'hawaiian',
+    'iw': 'hebrew',
+    'hi': 'hindi',
+    'hmn': 'hmong',
+    'hu': 'hungarian',
+    'is': 'icelandic',
+    'ig': 'igbo',
+    'id': 'indonesian',
+    'ga': 'irish',
+    'it': 'italian',
+    'ja': 'japanese',
+    'jw': 'javanese',
+    'kn': 'kannada',
+    'kk': 'kazakh',
+    'km': 'khmer',
+    'ko': 'korean',
+    'ku': 'kurdish (kurmanji)',
+    'ky': 'kyrgyz',
+    'lo': 'lao',
+    'la': 'latin',
+    'lv': 'latvian',
+    'lt': 'lithuanian',
+    'lb': 'luxembourgish',
+    'mk': 'macedonian',
+    'mg': 'malagasy',
+    'ms': 'malay',
+    'ml': 'malayalam',
+    'mt': 'maltese',
+    'mi': 'maori',
+    'mr': 'marathi',
+    'mn': 'mongolian',
+    'my': 'myanmar (burmese)',
+    'ne': 'nepali',
+    'no': 'norwegian',
+    'ps': 'pashto',
+    'fa': 'persian',
+    'pl': 'polish',
+    'pt': 'portuguese',
+    'pa': 'punjabi',
+    'ro': 'romanian',
+    'ru': 'russian',
+    'sm': 'samoan',
+    'gd': 'scots gaelic',
+    'sr': 'serbian',
+    'st': 'sesotho',
+    'sn': 'shona',
+    'sd': 'sindhi',
+    'si': 'sinhala',
+    'sk': 'slovak',
+    'sl': 'slovenian',
+    'so': 'somali',
+    'es': 'spanish',
+    'su': 'sundanese',
+    'sw': 'swahili',
+    'sv': 'swedish',
+    'tg': 'tajik',
+    'ta': 'tamil',
+    'te': 'telugu',
+    'th': 'thai',
+    'tr': 'turkish',
+    'uk': 'ukrainian',
+    'ur': 'urdu',
+    'uz': 'uzbek',
+    'vi': 'vietnamese',
+    'cy': 'welsh',
+    'xh': 'xhosa',
+    'yi': 'yiddish',
+    'yo': 'yoruba',
+    'zu': 'zulu',
+    'fil': 'Filipino',
+    'he': 'Hebrew'
+}
+
+def get_token(token_file):
+    with open(token_file) as f:
+        return f.readline()
+
+async def is_English(word):
+    alphanum = re.compile(r'^[a-zA-Z0-9]+$')
+    return alphanum.match(word) is not None
+
+async def edit_embed(element, meaning, pronunce, data):
+    embed=discord.Embed(title='**->**'+element, description='**'+meaning+'**\r-----------------------------------------', color=0xff80c0)
+    for i in range(len(data)):
+        embed.add_field(name=f'>>>  類語{i}: '+str(data[i][0])+'\r_'+str(data[i][1])+"_", value='**->** '+str(data[i][2]), inline=True)
+    embed.set_footer(text='<発音記号 : '+pronunce+'>')
+    return embed
+
+async def weblio_trans(element):
+    url = f'https://ejje.weblio.jp/content/{element}'
+    a_url = f'https://ejje.weblio.jp/english-thesaurus/content/{element}'
+    async with session.get(url) as response:
+            root = lxml.html.fromstring(await response.text())
+            meaning = root.xpath('/html/head/meta[9]')[0].attrib['content']
+            if 'weblio辞書で英語学習' in meaning:
+                fuckyou =[
+                    f"Standard English please?\rI don't understand **{element}**.",
+                    f"You're really an ass.\rWhat is **{element}**???:joy:",
+                    f"...{element}???:thinking:",
+                    f"I know how you feel.:sweat_smile:",
+                    f":eye:  　:eye:      -----------------------\r       :nose:         <   {element}? So what?\r       :lips:             -----------------------"
+                ]
+                embed=discord.Embed(title=fuckyou[randint(0,len(fuckyou)-1)], color=0xff80c0)
+                return embed
+            else:
+                data = []
+                pronunce = root.xpath('//*[@id="phoneticEjjeNavi"]/div/span[2]')[0].text #pronunciation 1
+                async with session.get(a_url) as a_response:
+                    a_root = lxml.html.fromstring(await a_response.text())
+                    for i in range(len(a_root.xpath('//*[@id="thesaurus-list-tbl"]/tbody/tr'))-1):
+                        synonym = []
+                        synonym.append(a_root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[1]/p[1]')[0].text_content()) #synonym_jp 0
+                        synonym.append(a_root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[1]/p[2]')[0].text_content()) #synonym_en 1
+                        synonym.append(a_root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[2]/p')[0].text_content()) #fix_synonym 2
+                        data.append(synonym)
+                return await edit_embed(element, meaning, pronunce, data)
+
+async def google_trans(element, dest):
+    translate = t.translate(element, dest=dest).text
+    embed = discord.Embed(title='**->** '+element, description=translate, color=16738740)
+    embed.set_footer(text='<Brought by google translation>')
+    return embed
+
+async def trans(contents):
+    if len(contents) == 1 and await is_English(contents[0]):
+        element = contents[0]
+        embed = await weblio_trans(element)
+    else:
+        dest = 'ja'
+        for content in contents:
+            if content[0] == '-' and content[1:].lower() in LANGUAGES:
+                dest = 'zh-cn' if content[1:].lower() == 'cn' else content[1:].lower()
+                contents.remove(content)
+        element = ' '.join(contents)
+        embed = await google_trans(element, dest)
+
+    return embed
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    elif message.content[0] == '*':
+        contents = message.content[1:].split()
+        embed = await trans(contents)
+        await message.channel.send('', embed=embed)
+    elif message.content == '?onbroid':
+        await session.close()
+        if session.closed:
+            print('Aiohttp client session is closed')
+        await client.close()
+
+if __name__ == '__main__':
+    client.run(get_token(token_file))
