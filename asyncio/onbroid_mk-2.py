@@ -127,12 +127,42 @@ async def is_English(word):
     alphanum = re.compile(r'^[a-zA-Z0-9]+$')
     return alphanum.match(word) is not None
 
+def show_lang():
+    description = ''
+    for key in LANGUAGES:
+        description += f" {key} : {LANGUAGES[key]}\r"
+    embed = discord.Embed(title="**Available Languages**",description=description ,color=0x2ee21f)
+    return embed
+
 async def edit_embed(element, meaning, pronunce, data):
     embed=discord.Embed(title='**->**'+element, description='**'+meaning+'**\r-----------------------------------------', color=0xff80c0)
     for i in range(len(data)):
         embed.add_field(name=f'>>>  類語{i}: '+str(data[i][0])+'\r_'+str(data[i][1])+"_", value='**->** '+str(data[i][2]), inline=True)
     embed.set_footer(text='<発音記号 : '+pronunce+'>')
     return embed
+
+async def nothing_came_up(element):
+    fuckyou =[
+        f"Standard English please?\rI don't understand **{element}**.",
+        f"You're really an ass.\rWhat is **{element}**???:joy:",
+        f"...{element}???:thinking:",
+        f"I know how you feel.:sweat_smile:",
+        f":eye:  　:eye:      -----------------------\r       :nose:         <   {element}? So what?\r       :lips:             -----------------------"
+    ]
+    embed=discord.Embed(title=fuckyou[randint(0,len(fuckyou)-1)], color=0xff80c0)
+    return embed
+
+async def get_synoym(url):
+    data = []
+    async with session.get(url) as response:
+        root = lxml.html.fromstring(await response.text())
+        for i in range(len(root.xpath('//*[@id="thesaurus-list-tbl"]/tbody/tr'))-1):
+            synonym = []
+            synonym.append(root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[1]/p[1]')[0].text_content()) #synonym_jp 0
+            synonym.append(root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[1]/p[2]')[0].text_content()) #synonym_en 1
+            synonym.append(root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[2]/p')[0].text_content()) #fix_synonym 2
+            data.append(synonym)
+        return data
 
 async def weblio_trans(element):
     url = f'https://ejje.weblio.jp/content/{element}'
@@ -141,31 +171,15 @@ async def weblio_trans(element):
             root = lxml.html.fromstring(await response.text())
             meaning = root.xpath('/html/head/meta[9]')[0].attrib['content']
             if 'weblio辞書で英語学習' in meaning:
-                fuckyou =[
-                    f"Standard English please?\rI don't understand **{element}**.",
-                    f"You're really an ass.\rWhat is **{element}**???:joy:",
-                    f"...{element}???:thinking:",
-                    f"I know how you feel.:sweat_smile:",
-                    f":eye:  　:eye:      -----------------------\r       :nose:         <   {element}? So what?\r       :lips:             -----------------------"
-                ]
-                embed=discord.Embed(title=fuckyou[randint(0,len(fuckyou)-1)], color=0xff80c0)
-                return embed
+                return await nothing_came_up(element)
             else:
-                data = []
                 pronunce = root.xpath('//*[@id="phoneticEjjeNavi"]/div/span[2]')[0].text #pronunciation 1
-                async with session.get(a_url) as a_response:
-                    a_root = lxml.html.fromstring(await a_response.text())
-                    for i in range(len(a_root.xpath('//*[@id="thesaurus-list-tbl"]/tbody/tr'))-1):
-                        synonym = []
-                        synonym.append(a_root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[1]/p[1]')[0].text_content()) #synonym_jp 0
-                        synonym.append(a_root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[1]/p[2]')[0].text_content()) #synonym_en 1
-                        synonym.append(a_root.xpath(f'//*[@id="thesaurus-list-tbl"]/tbody/tr[{i+2}]/td[2]/p')[0].text_content()) #fix_synonym 2
-                        data.append(synonym)
+                data = await get_synoym(a_url)
                 return await edit_embed(element, meaning, pronunce, data)
 
 async def google_trans(element, dest):
     translate = t.translate(element, dest=dest).text
-    embed = discord.Embed(title='**->** '+element, description=translate, color=16738740)
+    embed = discord.Embed(title='**->** '+element+"  to  "+dest, description=translate, color=16738740)
     embed.set_footer(text='<Brought by google translation>')
     return embed
 
@@ -176,9 +190,12 @@ async def trans(contents):
     else:
         dest = 'ja'
         for content in contents:
-            if content[0] == '-' and content[1:].lower() in LANGUAGES:
-                dest = 'zh-cn' if content[1:].lower() == 'cn' else content[1:].lower()
-                contents.remove(content)
+            if content[0] == '-':
+                if content[1:].lower() in LANGUAGES:
+                    dest = 'zh-cn' if content[1:].lower() == 'cn' else content[1:].lower()
+                    contents.remove(content)
+                else:
+                    return show_lang()
         element = ' '.join(contents)
         embed = await google_trans(element, dest)
 
@@ -192,6 +209,8 @@ async def on_message(message):
         contents = message.content[1:].split()
         embed = await trans(contents)
         await message.channel.send('', embed=embed)
+    elif message.content == '?help':
+        await message.channel.send('', embed=show_lang())
     elif message.content == '?onbroid':
         await session.close()
         if session.closed:
