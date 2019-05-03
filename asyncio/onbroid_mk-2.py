@@ -266,6 +266,5 @@ async def on_message(message):
                     langs.append(contents_lower[i])
             await message.channel.send('', embed=this_lang_is(langs))
 
-
 if __name__ == '__main__':
     client.run(get_token(token_file))
