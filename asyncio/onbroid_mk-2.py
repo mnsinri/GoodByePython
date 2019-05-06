@@ -27,7 +27,7 @@ LANGUAGES = {
     'ca': 'catalan',
     'ceb': 'cebuano',
     'ny': 'chichewa',
-    'cn': 'chinese',
+    'zh': 'chinese',
     'co': 'corsican',
     'hr': 'croatian',
     'cs': 'czech',
@@ -232,7 +232,7 @@ async def trans(contents):
         for content in contents:
             if content[0] == '-':
                 if content[1:].lower() in LANGUAGES:
-                    dest = 'zh-cn' if content[1:].lower() == 'cn' else content[1:].lower()
+                    dest = 'zh-cn' if content[1:].lower() == 'zn' else content[1:].lower()
                     contents.remove(content)
                 else:
                     return show_lang()
