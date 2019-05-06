@@ -243,7 +243,7 @@ async def trans(contents):
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author.bot:
         return
     elif message.content[0] == '*': #translate
         contents = message.content[1:].split()
