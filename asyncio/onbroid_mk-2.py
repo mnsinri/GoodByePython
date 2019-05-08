@@ -209,7 +209,10 @@ async def weblio_trans(element):
             if 'weblio辞書で英語学習' in meaning:
                 return await nothing_came_up(element)
             else:
-                pronunce = root.xpath('//*[@id="phoneticEjjeNavi"]/div/span[2]')[0].text #pronunciation 1
+                try:
+                    pronunce = root.xpath('//*[@id="phoneticEjjeNavi"]/div/span[2]')[0].text #pronunciation 1
+                except:
+                    pronunce = ''
                 data = await get_synoym(a_url)
                 return await edit_embed(element, meaning, pronunce, data)
 
