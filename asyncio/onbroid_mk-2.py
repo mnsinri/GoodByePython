@@ -205,7 +205,7 @@ async def weblio_trans(element):
     a_url = f'https://ejje.weblio.jp/english-thesaurus/content/{element}'
     async with session.get(url) as response:
             root = lxml.html.fromstring(await response.text())
-            meaning = root.xpath('/html/head/meta[9]')[0].attrib['content']
+            meaning = root.xpath('/html/head/meta[13]')[0].attrib['content']
             if 'weblio辞書で英語学習' in meaning:
                 return await nothing_came_up(element)
             else:
