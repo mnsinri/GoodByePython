@@ -11,5 +11,5 @@ while True :
         print('Only integer is usable.')
 
 
-n = prime.eratosthenes(n)
+n = prime.____(n)
 print(n)

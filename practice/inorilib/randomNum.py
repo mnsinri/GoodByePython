@@ -16,5 +16,5 @@ while not isinstance(n, int) :
     except :
         print('As you know, put a positive integer.')
 
-if f.integerfile(name, n) == False :
+if f.___(name, n) == False :
     print('unable to write to the file')
